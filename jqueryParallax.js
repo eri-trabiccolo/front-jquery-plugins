@@ -10,21 +10,6 @@
  *
  * =================================================== */
 ;(function ( $, window, document, undefined ) {
-  /*
-  * In order to handle a smooth scroll
-  * ( inspired by jquery.waypoints and smoothScroll.js )
-  * Maybe use this -> https://gist.github.com/paulirish/1579671
-  */
-  var czrParallaxRequestAnimationFrame = function(callback) {
-    var requestFn = ( czrapp && czrapp.requestAnimationFrame) ||
-      window.requestAnimationFrame ||
-      window.mozRequestAnimationFrame ||
-      window.webkitRequestAnimationFrame ||
-      function( callback ) { window.setTimeout(callback, 1000 / 60); };
-
-    requestFn.call(window, callback);
-  };
-
   //defaults
   var pluginName = 'czrParallax',
       defaults = {
@@ -53,7 +38,7 @@
     //cache some element
     this.$_document   = $(document);
     this.$_window     = czrapp ? czrapp.$_window : $(window);
-    this.windowIsBusy = false;
+    this.doingAnimation = false;
 
     this.initWaypoints();
     this.stageParallaxElements();
@@ -93,7 +78,7 @@
           }else{
             self.element.removeClass('parallaxing');
             self.$_window.off('scroll', self.maybeParallaxMe );
-            self.windowIsBusy = false;
+            self.doingAnimation = false;
             self.element.css('top', 0 );
           }
         }
@@ -109,7 +94,7 @@
           }else {
             self.element.removeClass('parallaxing');
             self.$_window.off('scroll', self.maybeParallaxMe );
-            self.windowIsBusy = false;
+            self.doingAnimation = false;
           }
         },
         offset: function(){
@@ -126,11 +111,11 @@
   Plugin.prototype.maybeParallaxMe = function() {
       var self = this;
 
-      if ( !this.windowIsBusy ) {
-        this.windowIsBusy = true;
-        czrParallaxRequestAnimationFrame(function() {
+      if ( !this.doingAnimation ) {
+        this.doingAnimation = true;
+        window.requestAnimationFrame(function() {
           self.parallaxMe();
-          self.windowIsBusy = false;
+          self.doingAnimation = false;
         });
       }
   };
