@@ -6,25 +6,11 @@
  *
  * License URI: http://www.gnu.org/licenses/gpl-2.0.html
  *
- *
+ * Requires requestAnimationFrame polyfill:
+ * http://paulirish.com/2011/requestanimationframe-for-smart-animating/
  *
  * =================================================== */
 ;(function ( $, window, document, undefined ) {
-  /*
-  * In order to handle a smooth scroll
-  * ( inspired by jquery.waypoints and smoothScroll.js )
-  * Maybe use this -> https://gist.github.com/paulirish/1579671
-  */
-  var czrParallaxRequestAnimationFrame = function(callback) {
-    var requestFn = ( czrapp && czrapp.requestAnimationFrame) ||
-      window.requestAnimationFrame ||
-      window.mozRequestAnimationFrame ||
-      window.webkitRequestAnimationFrame ||
-      function( callback ) { window.setTimeout(callback, 1000 / 60); };
-
-    requestFn.call(window, callback);
-  };
-
   //defaults
   var pluginName = 'czrParallax',
       defaults = {
