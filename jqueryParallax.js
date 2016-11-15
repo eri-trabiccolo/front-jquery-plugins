@@ -32,13 +32,13 @@
         parallaxDirection : 1,
         parallaxOverflowHidden : true,
         oncustom : [],//list of event here
-        backgroundClass : 'image'
+        backgroundClass : 'image',
+        parallaxParent  : '.parallax-wrapper'
       };
 
   function Plugin( element, options ) {
     this.element = $(element);
     this.options = $.extend( {}, defaults, options, this.parseElementDataOptions() ) ;
-    this._defaults = defaults;
     this._name = pluginName;
     this.init();
   }
@@ -53,11 +53,20 @@
     //cache some element
     this.$_document   = $(document);
     this.$_window     = czrapp ? czrapp.$_window : $(window);
-    this.doingAnimation = false;
+    this.wrapper      = this.element.closest(this.options.parallaxParent );
 
-    this.initWaypoints();
+    this.doingAnimation = false;
+    /*
+    * If not wrapper defined the parallax element will freely parallax in the viewport
+    */
+    if ( this.wrapper.length < 1 )
+      this.wrapper = this.element;
+
     this.stageParallaxElements();
+    this.initWaypoints();
     this._bind_evt();
+
+    this.maybeParallaxMe();
   };
 
   //@return void
@@ -71,28 +80,23 @@
   };
 
   Plugin.prototype.stageParallaxElements = function() {
-
     this.element.css( 'position', this.element.hasClass( this.options.backgroundClass ) ? 'absolute' : 'relative' );
-    if ( this.options.parallaxOverflowHidden ){
-      var $_wrapper = this.element.closest( '.parallax-wrapper' );
-      if ( $_wrapper.length )
-        $_wrapper.css( 'overflow', 'hidden' );
-    }
+    if ( this.options.parallaxOverflowHidden )
+      this.wrapper.css( 'overflow', 'hidden' );
   };
 
   Plugin.prototype.initWaypoints = function() {
     var self = this;
 
       this.way_start = new Waypoint({
-        element: self.element,
+        element: self.wrapper,
         handler: function() {
-          self.maybeParallaxMe();
           if ( ! self.element.hasClass('parallaxing') ){
-            self.$_window.on('scroll', self.maybeParallaxMe );
+            window.addEventListener('scroll', self.maybeParallaxMe );
             self.element.addClass('parallaxing');
           }else{
             self.element.removeClass('parallaxing');
-            self.$_window.off('scroll', self.maybeParallaxMe );
+            window.removeEventListener('scroll', self.maybeParallaxMe );
             self.doingAnimation = false;
             self.element.css('top', 0 );
           }
@@ -100,15 +104,14 @@
       });
 
       this.way_stop = new Waypoint({
-        element: self.element,
+        element: self.wrapper,
         handler: function() {
-          self.maybeParallaxMe();
           if ( ! self.element.hasClass('parallaxing') ) {
-            self.$_window.on('scroll', self.maybeParallaxMe );
+            window.addEventListener('scroll', self.maybeParallaxMe );
             self.element.addClass('parallaxing');
           }else {
             self.element.removeClass('parallaxing');
-            self.$_window.off('scroll', self.maybeParallaxMe );
+            window.removeEventListener('scroll', self.maybeParallaxMe );
             self.doingAnimation = false;
           }
         },
@@ -124,30 +127,24 @@
   * In order to handle a smooth scroll
   */
   Plugin.prototype.maybeParallaxMe = function() {
-      var self = this;
+      var self      = this;
 
       if ( !this.doingAnimation ) {
         this.doingAnimation = true;
-        window.requestAnimationFrame(function() {
+        //window.requestAnimationFrame(function() {
           self.parallaxMe();
           self.doingAnimation = false;
-        });
+        //});
       }
   };
 
   Plugin.prototype.parallaxMe = function() {
-      //parallax only the current slide if in slider context?
-      /*
-      if ( ! ( this.element.hasClass( 'is-selected' ) || this.element.parent( '.is-selected' ).length ) )
-        return;
-      */
-
       var ratio = this.options.parallaxRatio,
           parallaxDirection = this.options.parallaxDirection,
-
           value = ratio * parallaxDirection * ( this.$_document.scrollTop() - this.way_start.triggerPoint );
 
-       this.element.css('top', parallaxDirection * value < 0 ? 0 : value );
+      value = parallaxDirection * value < 0 ? 0 : value;
+      this.element.css('top', value +'px' );
   };
 
 
