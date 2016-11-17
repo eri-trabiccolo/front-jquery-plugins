@@ -5,9 +5,11 @@
  * Replace all img src placeholder in the $element by the real src on scroll window event
  * Bind a 'smartload' event on each transformed img
  *
- * Note : the data-src attr has to be pre-processed before the actual page load
+ * Note : the data-src (data-srcset) attr has to be pre-processed before the actual page load
  * Example of regex to pre-process img server side with php :
  * preg_replace_callback('#<img([^>]+?)src=[\'"]?([^\'"\s>]+)[\'"]?([^>]*)>#', 'regex_callback' , $_html)
+ *
+ * (c) 2016 Nicolas Guillaume, Nice, France
  *
  *
  * Example of gif 1px x 1px placeholder :
@@ -16,6 +18,8 @@
  * inspired by the work of Luís Almeida
  * http://luis-almeida.github.com/unveil
  *
+ * Requires requestAnimationFrame polyfill:
+ * http://paulirish.com/2011/requestanimationframe-for-smart-animating/
  * =================================================== */
 ;(function ( $, window, document, undefined ) {
   //defaults
@@ -69,11 +73,10 @@
     if ( ! this.doingAnimation ) {
       this.doingAnimation = true;
       window.requestAnimationFrame(function() {
-        //self.parallaxMe();
-        self._maybe_trigger_load( $_imgs , _evt );        
+        self._maybe_trigger_load( $_imgs , _evt );
         self.doingAnimation = false;
       });
-    }    
+    }
   };
 
 
