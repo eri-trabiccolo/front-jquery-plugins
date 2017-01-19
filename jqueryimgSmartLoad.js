@@ -22,7 +22,7 @@
   var pluginName = 'imgSmartLoad',
       defaults = {
         load_all_images_on_first_scroll : false,
-        attribute : [ 'data-src', 'data-srcset' ],
+        attribute : [ 'data-src', 'data-srcset', 'data-sizes' ],
         excludeImg : '',
         threshold : 200,
         fadeIn_options : { duration : 400 },
@@ -70,10 +70,10 @@
       this.doingAnimation = true;
       window.requestAnimationFrame(function() {
         //self.parallaxMe();
-        self._maybe_trigger_load( $_imgs , _evt );        
+        self._maybe_trigger_load( $_imgs , _evt );
         self.doingAnimation = false;
       });
-    }    
+    }
   };
 
 
@@ -122,6 +122,7 @@
     var $_img    = $(_img),
         _src     = $_img.attr( this.options.attribute[0] ),
         _src_set = $_img.attr( this.options.attribute[1] ),
+        _sizes   = $_img.attr( this.options.attribute[2] ),
         self = this;
 
     $_img.parent().addClass('smart-loading');
@@ -132,6 +133,7 @@
     //An attribute to remove; as of version 1.7, it can be a space-separated list of attributes.
     //minimum supported wp version (3.4+) embeds jQuery 1.7.2
     .removeAttr( this.options.attribute.join(' ') )
+    .attr( 'sizes' , _sizes )
     .attr( 'srcset' , _src_set )
     .attr('src', _src )
     .load( function () {
