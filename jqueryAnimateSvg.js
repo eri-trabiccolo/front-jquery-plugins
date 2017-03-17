@@ -30,7 +30,7 @@
               return $('#' + id ).css('opacity', options.svg_opacity );
           };
           $.when( set_opacity() ).done( function() {
-              new Vivus( id, {type: 'delayed', duration: animation_duration } );
+              new Vivus( id, {type: 'delayed', duration: options.animation_duration } );
           });
       };
 
