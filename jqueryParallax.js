@@ -22,10 +22,11 @@
             };
 
         function Plugin( element, options ) {
-              this.element = $(element);
-              this.options = $.extend( {}, defaults, options, this.parseElementDataOptions() ) ;
-              this._defaults = defaults;
-              this._name = pluginName;
+              this.element         = $(element);
+              this.element_wrapper = this.element.closest( '.parallax-wrapper' );
+              this.options         = $.extend( {}, defaults, options, this.parseElementDataOptions() ) ;
+              this._defaults       = defaults;
+              this._name           = pluginName;
               this.init();
         }
 
@@ -57,9 +58,14 @@
         };
 
         Plugin.prototype.stageParallaxElements = function() {
-              this.element.css( 'position', this.element.hasClass( this.options.backgroundClass ) ? 'absolute' : 'relative' );
+
+              this.element.css({
+                    'position': this.element.hasClass( this.options.backgroundClass ) ? 'absolute' : 'relative',
+                    'will-change': 'transform'
+              });
+
               if ( this.options.parallaxOverflowHidden ){
-                    var $_wrapper = this.element.closest( '.parallax-wrapper' );
+                    var $_wrapper = this.element_wrapper;
                     if ( $_wrapper.length )
                       $_wrapper.css( 'overflow', 'hidden' );
               }
@@ -69,7 +75,7 @@
               var self = this;
 
               this.way_start = new Waypoint({
-                    element: self.element,
+                    element: self.element_wrapper.length ? self.element_wrapper : self.element,
                     handler: function() {
                           self.maybeParallaxMe();
                           if ( ! self.element.hasClass('parallaxing') ){
@@ -85,7 +91,7 @@
               });
 
               this.way_stop = new Waypoint({
-                    element: self.element,
+                    element: self.element_wrapper.length ? self.element_wrapper : self.element,
                     handler: function() {
                           self.maybeParallaxMe();
                           if ( ! self.element.hasClass('parallaxing') ) {
