@@ -52,8 +52,9 @@
 
             //attach action to the load event
             $_imgs.bind( 'load_img', {}, function() { self._load_img(this); });
-
+            //the scroll event gets throttled with the requestAnimationFrame
             $(window).scroll( function( _evt ) { self._better_scroll_event_handler( $_imgs, _evt ); } );
+            //debounced resize event
             $(window).resize( _.debounce( function( _evt ) { self._maybe_trigger_load( $_imgs, _evt ); }, 100 ) );
             //on load
             this._maybe_trigger_load( $_imgs );
