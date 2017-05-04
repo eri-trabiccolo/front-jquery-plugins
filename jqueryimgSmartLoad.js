@@ -26,16 +26,17 @@
           defaults = {
                 load_all_images_on_first_scroll : false,
                 attribute : [ 'data-src', 'data-srcset', 'data-sizes' ],
-                excludeImg : '',
+                excludeImg : [''],
                 threshold : 200,
                 fadeIn_options : { duration : 400 },
                 delaySmartLoadEvent : 0
           };
 
 
+
       function Plugin( element, options ) {
             this.element = element;
-            this.options = $.extend( {}, defaults, options) ;
+            this.options = $.extend( {}, defaults, options );
             this._defaults = defaults;
             this._name = pluginName;
             this.init();
@@ -125,9 +126,35 @@
                 _src     = $_img.attr( this.options.attribute[0] ),
                 _src_set = $_img.attr( this.options.attribute[1] ),
                 _sizes   = $_img.attr( this.options.attribute[2] ),
+                $_parent = $_img.parent(),
                 self = this;
 
-            $_img.parent().addClass('smart-loading');
+            //  Prevent try to smartload an already loaded $(img)
+            //  this fixes an issue when firing this plugin
+            //  on a container X and on a container Y and
+            //  X and Y intersection is not empty.
+            //  In this case might happen the following:
+            //  (a)
+            //  1) X is initialized so the bind on load_img event happens
+            //  2) Images in X are found visibile and processed here ( and unbound on load_img event happens )
+            //  3) The image placeholder is made hidden
+            //  4) Images in X are also loaded : fadeIn happens and tc-smart-loaded class added
+            //
+            //  (b)
+            //  1) Y is initialized so the bind on load_img event happens, again
+            //  2) Images in Y are found and re-processed here ( and unbound on load_img event happens )
+            //  3) The image is made hidden ( This time it can be the already loaded img !!! )
+            //  4) Images in Y are loaded : fadeIn MIGHT NOT happen if the img already has tc-smart-loaded (a.4) class
+            //     as we prevent the additional fading-in in the 'load' callback (!)
+            //
+            // a.2-4 and b.2-4 are aysnchronous so that after a.4 can happen b.3
+            // when a) and b) happen one after another we don't have conflicts as we just bind images with the data-src attribut
+            // that we remove as soon as we start the smartloading process
+            if ( $_img.hasClass( 'tc-smart-load-skip' ) )
+                  return this;
+            $_img.addClass( 'tc-smart-load-skip' );
+
+            $_parent.addClass( 'smart-loading' );
 
             $_img.unbind('load_img')
                   .hide()
@@ -171,7 +198,7 @@
             if ( $_img[0].complete ) {
                   $_img.load();
             }
-            $_img.parent().removeClass('smart-loading');
+            $_parent.removeClass('smart-loading');
       };
 
 
